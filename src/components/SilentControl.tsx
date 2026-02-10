@@ -16,6 +16,7 @@ export function SilentControl({ config, onChange }: SilentControlProps) {
           小節ミュート
         </span>
         <button
+          data-testid="silent-toggle"
           onClick={() => onChange({ enabled: !config.enabled })}
           className={`relative w-11 h-6 rounded-full transition-colors ${
             config.enabled ? 'bg-gray-900' : 'bg-gray-300'

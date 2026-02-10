@@ -30,7 +30,7 @@ export function TimeSignatureSelect({
   );
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div data-testid="time-signature-select" className="flex flex-col items-center gap-2">
       <div className="flex flex-wrap justify-center gap-2">
         {QUARTER_SIGNATURES.map(renderButton)}
       </div>

@@ -28,6 +28,7 @@ export function BeatPattern({
         return (
           <button
             key={i}
+            data-testid="beat-button"
             onClick={() => onToggle(i)}
             className={`${style.size} ${style.bg} rounded-full transition-all active:scale-90
                        ${isActive ? 'ring-2 ring-offset-2 ring-gray-900 scale-110' : ''}`}

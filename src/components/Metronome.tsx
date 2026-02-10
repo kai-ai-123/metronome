@@ -29,7 +29,7 @@ export function Metronome() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full max-w-md mx-auto px-4 py-8">
+    <div data-testid="metronome" className="flex flex-col items-center gap-8 w-full max-w-md mx-auto px-4 py-8">
       {/* BPM表示 + コントロール */}
       <BPMControl bpm={config.bpm} onChange={setBpm} />
 

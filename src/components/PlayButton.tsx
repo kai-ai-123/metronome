@@ -8,6 +8,7 @@ interface PlayButtonProps {
 export function PlayButton({ isPlaying, onToggle }: PlayButtonProps) {
   return (
     <button
+      data-testid="play-button"
       onClick={onToggle}
       className="w-20 h-20 rounded-full bg-gray-900 text-white flex items-center justify-center
                  hover:bg-gray-700 active:scale-95 transition-all mx-auto"

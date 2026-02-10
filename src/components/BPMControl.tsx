@@ -12,7 +12,7 @@ export function BPMControl({ bpm, onChange }: BPMControlProps) {
   return (
     <div className="flex flex-col items-center gap-4">
       {/* BPM数値 */}
-      <div className="text-6xl font-light text-gray-900 tabular-nums">
+      <div data-testid="bpm-value" className="text-6xl font-light text-gray-900 tabular-nums">
         {bpm}
       </div>
       <div className="text-sm text-gray-400 tracking-widest uppercase">BPM</div>
@@ -35,6 +35,7 @@ export function BPMControl({ bpm, onChange }: BPMControlProps) {
         </button>
 
         <input
+          data-testid="bpm-slider"
           type="range"
           min={30}
           max={300}
