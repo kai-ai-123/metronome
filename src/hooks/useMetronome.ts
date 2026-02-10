@@ -29,11 +29,7 @@ interface UseMetronomeReturn {
 
 // --- Audio ---
 
-function playClick(
-  ctx: AudioContext,
-  accent: BeatAccent,
-  time: number,
-) {
+function playClick(ctx: AudioContext, accent: BeatAccent, time: number) {
   if (accent === 'mute') return;
 
   const osc = ctx.createOscillator();
@@ -59,7 +55,7 @@ function playClick(
 // --- Hook ---
 
 const SCHEDULE_AHEAD = 0.1; // 100ms先まで事前スケジュール
-const TIMER_INTERVAL = 25;  // 25msごとにチェック
+const TIMER_INTERVAL = 25; // 25msごとにチェック
 
 const DEFAULT_SILENT: SilentConfig = {
   enabled: false,
@@ -99,12 +95,15 @@ export function useMetronome(): UseMetronomeReturn {
   configRef.current = config;
 
   /** 現在の小節が無音区間かどうかを判定 */
-  const checkSilent = useCallback((measureIndex: number, silent: SilentConfig): boolean => {
-    if (!silent.enabled) return false;
-    const cycleLength = silent.soundBars + silent.silentBars;
-    const posInCycle = measureIndex % cycleLength;
-    return posInCycle >= silent.soundBars;
-  }, []);
+  const checkSilent = useCallback(
+    (measureIndex: number, silent: SilentConfig): boolean => {
+      if (!silent.enabled) return false;
+      const cycleLength = silent.soundBars + silent.silentBars;
+      const posInCycle = measureIndex % cycleLength;
+      return posInCycle >= silent.soundBars;
+    },
+    [],
+  );
 
   const scheduler = useCallback(() => {
     const ctx = audioCtxRef.current;
@@ -126,7 +125,8 @@ export function useMetronome(): UseMetronomeReturn {
         // テンポランプ: everyBarsごとにBPMを変更
         const ramp = cfg.tempoRamp;
         if (ramp.enabled) {
-          const measuresSinceLast = measureCountRef.current - lastRampMeasureRef.current;
+          const measuresSinceLast =
+            measureCountRef.current - lastRampMeasureRef.current;
           if (measuresSinceLast >= ramp.everyBars) {
             lastRampMeasureRef.current = measureCountRef.current;
             const currentBpm = cfg.bpm;

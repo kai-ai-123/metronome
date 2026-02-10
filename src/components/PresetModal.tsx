@@ -93,7 +93,9 @@ export function PresetModal({
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleRenameConfirm()}
+                        onKeyDown={(e) =>
+                          e.key === 'Enter' && handleRenameConfirm()
+                        }
                         className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
                         autoFocus
                       />
@@ -164,7 +166,10 @@ export function PresetModal({
                 保存
               </button>
               <button
-                onClick={() => { setIsSaving(false); setSaveName(''); }}
+                onClick={() => {
+                  setIsSaving(false);
+                  setSaveName('');
+                }}
                 className="px-2 py-2 text-sm text-gray-400 hover:text-gray-600"
               >
                 取消
@@ -176,7 +181,9 @@ export function PresetModal({
               disabled={isFull}
               className="w-full py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              {isFull ? `上限（${MAX_PRESETS}個）に達しています` : '現在の設定を保存'}
+              {isFull
+                ? `上限（${MAX_PRESETS}個）に達しています`
+                : '現在の設定を保存'}
             </button>
           )}
         </div>

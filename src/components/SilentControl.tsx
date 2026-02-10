@@ -37,14 +37,20 @@ export function SilentControl({ config, onChange }: SilentControlProps) {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 w-12">ON</span>
             <button
-              onClick={() => onChange({ soundBars: Math.max(1, config.soundBars - 1) })}
+              onClick={() =>
+                onChange({ soundBars: Math.max(1, config.soundBars - 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               −
             </button>
-            <span className="text-lg font-semibold w-6 text-center">{config.soundBars}</span>
+            <span className="text-lg font-semibold w-6 text-center">
+              {config.soundBars}
+            </span>
             <button
-              onClick={() => onChange({ soundBars: Math.min(8, config.soundBars + 1) })}
+              onClick={() =>
+                onChange({ soundBars: Math.min(8, config.soundBars + 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               +
@@ -55,14 +61,20 @@ export function SilentControl({ config, onChange }: SilentControlProps) {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 w-12">MUTE</span>
             <button
-              onClick={() => onChange({ silentBars: Math.max(1, config.silentBars - 1) })}
+              onClick={() =>
+                onChange({ silentBars: Math.max(1, config.silentBars - 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               −
             </button>
-            <span className="text-lg font-semibold w-6 text-center">{config.silentBars}</span>
+            <span className="text-lg font-semibold w-6 text-center">
+              {config.silentBars}
+            </span>
             <button
-              onClick={() => onChange({ silentBars: Math.min(8, config.silentBars + 1) })}
+              onClick={() =>
+                onChange({ silentBars: Math.min(8, config.silentBars + 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               +

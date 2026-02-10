@@ -60,10 +60,7 @@ export function Metronome() {
       </div>
 
       {/* 小節ミュート */}
-      <SilentControl
-        config={config.silent}
-        onChange={setSilentConfig}
-      />
+      <SilentControl config={config.silent} onChange={setSilentConfig} />
 
       {/* テンポ変更 */}
       <TempoRampControl

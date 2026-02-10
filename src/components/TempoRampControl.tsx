@@ -8,7 +8,11 @@ interface TempoRampControlProps {
   onChange: (update: Partial<TempoRampConfig>) => void;
 }
 
-export function TempoRampControl({ config, currentBpm, onChange }: TempoRampControlProps) {
+export function TempoRampControl({
+  config,
+  currentBpm,
+  onChange,
+}: TempoRampControlProps) {
   const sign = config.mode === 'up' ? '+' : '-';
 
   const handleModeChange = (mode: TempoRampMode) => {
@@ -91,7 +95,9 @@ export function TempoRampControl({ config, currentBpm, onChange }: TempoRampCont
             >
               −
             </button>
-            <span className="text-lg font-semibold w-10 text-center">{config.targetBpm}</span>
+            <span className="text-lg font-semibold w-10 text-center">
+              {config.targetBpm}
+            </span>
             <button
               onClick={handleTargetUp}
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
@@ -104,14 +110,21 @@ export function TempoRampControl({ config, currentBpm, onChange }: TempoRampCont
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 w-20">変化量</span>
             <button
-              onClick={() => onChange({ stepBpm: Math.max(1, config.stepBpm - 1) })}
+              onClick={() =>
+                onChange({ stepBpm: Math.max(1, config.stepBpm - 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               −
             </button>
-            <span className="text-lg font-semibold w-10 text-center">{sign}{config.stepBpm}</span>
+            <span className="text-lg font-semibold w-10 text-center">
+              {sign}
+              {config.stepBpm}
+            </span>
             <button
-              onClick={() => onChange({ stepBpm: Math.min(20, config.stepBpm + 1) })}
+              onClick={() =>
+                onChange({ stepBpm: Math.min(20, config.stepBpm + 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               +
@@ -122,14 +135,20 @@ export function TempoRampControl({ config, currentBpm, onChange }: TempoRampCont
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 w-20">間隔</span>
             <button
-              onClick={() => onChange({ everyBars: Math.max(1, config.everyBars - 1) })}
+              onClick={() =>
+                onChange({ everyBars: Math.max(1, config.everyBars - 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               −
             </button>
-            <span className="text-lg font-semibold w-14 text-center whitespace-nowrap">{config.everyBars}小節</span>
+            <span className="text-lg font-semibold w-14 text-center whitespace-nowrap">
+              {config.everyBars}小節
+            </span>
             <button
-              onClick={() => onChange({ everyBars: Math.min(16, config.everyBars + 1) })}
+              onClick={() =>
+                onChange({ everyBars: Math.min(16, config.everyBars + 1) })
+              }
               className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-lg font-medium"
             >
               +

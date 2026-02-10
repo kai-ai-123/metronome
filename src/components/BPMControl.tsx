@@ -19,10 +19,18 @@ export function BPMControl({ bpm, onChange }: BPMControlProps) {
 
       {/* ボタン + スライダー */}
       <div className="flex items-center gap-2 w-full max-w-xs">
-        <button onClick={() => onChange(bpm - 5)} className={btnClass} aria-label="BPMを5下げる">
+        <button
+          onClick={() => onChange(bpm - 5)}
+          className={btnClass}
+          aria-label="BPMを5下げる"
+        >
           «
         </button>
-        <button onClick={() => onChange(bpm - 1)} className={btnClass} aria-label="BPMを1下げる">
+        <button
+          onClick={() => onChange(bpm - 1)}
+          className={btnClass}
+          aria-label="BPMを1下げる"
+        >
           ‹
         </button>
 
@@ -35,10 +43,18 @@ export function BPMControl({ bpm, onChange }: BPMControlProps) {
           className="flex-1 accent-gray-900"
         />
 
-        <button onClick={() => onChange(bpm + 1)} className={btnClass} aria-label="BPMを1上げる">
+        <button
+          onClick={() => onChange(bpm + 1)}
+          className={btnClass}
+          aria-label="BPMを1上げる"
+        >
           ›
         </button>
-        <button onClick={() => onChange(bpm + 5)} className={btnClass} aria-label="BPMを5上げる">
+        <button
+          onClick={() => onChange(bpm + 5)}
+          className={btnClass}
+          aria-label="BPMを5上げる"
+        >
           »
         </button>
       </div>

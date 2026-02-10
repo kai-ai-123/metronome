@@ -31,15 +31,18 @@ export function usePresets() {
     setPresets(readFromStorage());
   }, []);
 
-  const savePreset = useCallback((name: string, config: MetronomeConfig): boolean => {
-    const current = readFromStorage();
-    if (current.length >= MAX_PRESETS) return false;
-    const preset: Preset = { id: generateId(), name, config };
-    const next = [...current, preset];
-    writeToStorage(next);
-    setPresets(next);
-    return true;
-  }, []);
+  const savePreset = useCallback(
+    (name: string, config: MetronomeConfig): boolean => {
+      const current = readFromStorage();
+      if (current.length >= MAX_PRESETS) return false;
+      const preset: Preset = { id: generateId(), name, config };
+      const next = [...current, preset];
+      writeToStorage(next);
+      setPresets(next);
+      return true;
+    },
+    [],
+  );
 
   const deletePreset = useCallback((id: string) => {
     const next = readFromStorage().filter((p) => p.id !== id);
@@ -48,7 +51,9 @@ export function usePresets() {
   }, []);
 
   const renamePreset = useCallback((id: string, name: string) => {
-    const next = readFromStorage().map((p) => (p.id === id ? { ...p, name } : p));
+    const next = readFromStorage().map((p) =>
+      p.id === id ? { ...p, name } : p,
+    );
     writeToStorage(next);
     setPresets(next);
   }, []);
