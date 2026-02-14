@@ -10,6 +10,15 @@ export type TimeSignature =
 
 export type BeatAccent = 'strong' | 'normal' | 'mute';
 
+export type SoundType = 'click' | 'wood' | 'beep' | 'hi-hat';
+
+export const SOUND_TYPES: { id: SoundType; label: string }[] = [
+  { id: 'click', label: 'クリック' },
+  { id: 'wood', label: 'ウッド' },
+  { id: 'beep', label: 'ビープ' },
+  { id: 'hi-hat', label: 'ハイハット' },
+];
+
 export interface SilentConfig {
   enabled: boolean;
   soundBars: number;
@@ -30,6 +39,7 @@ export interface MetronomeConfig {
   bpm: number;
   timeSignature: TimeSignature;
   beatPattern: BeatAccent[];
+  sound: SoundType;
   silent: SilentConfig;
   tempoRamp: TempoRampConfig;
 }

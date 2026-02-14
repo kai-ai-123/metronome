@@ -9,6 +9,7 @@ import { BeatPattern } from './BeatPattern';
 import { SilentControl } from './SilentControl';
 import { TempoRampControl } from './TempoRampControl';
 import { PlayButton } from './PlayButton';
+import { SoundSelect } from './SoundSelect';
 import { PresetModal } from './PresetModal';
 
 export function Metronome() {
@@ -19,6 +20,7 @@ export function Metronome() {
     setBpm,
     setTimeSignature,
     toggleBeatAccent,
+    setSound,
     setSilentConfig,
     setTempoRampConfig,
     applyConfig,
@@ -36,6 +38,18 @@ export function Metronome() {
       {/* 再生/停止 */}
       <PlayButton isPlaying={isPlaying} onToggle={togglePlay} />
 
+      {/* 拍パターン */}
+      <div className="w-full">
+        <div className="text-xs text-gray-400 text-center mb-3">
+          （タップで強弱切り替え）
+        </div>
+        <BeatPattern
+          pattern={config.beatPattern}
+          currentBeat={currentBeat}
+          onToggle={toggleBeatAccent}
+        />
+      </div>
+
       {/* 拍子選択 */}
       <div className="w-full">
         <div className="text-xs text-gray-400 text-center mb-2 tracking-widest uppercase">
@@ -47,16 +61,12 @@ export function Metronome() {
         />
       </div>
 
-      {/* 拍パターン */}
+      {/* 音色選択 */}
       <div className="w-full">
-        <div className="text-xs text-gray-400 text-center mb-3">
-          （タップで強弱切り替え）
+        <div className="text-xs text-gray-400 text-center mb-2 tracking-widest uppercase">
+          音色
         </div>
-        <BeatPattern
-          pattern={config.beatPattern}
-          currentBeat={currentBeat}
-          onToggle={toggleBeatAccent}
-        />
+        <SoundSelect value={config.sound} onChange={setSound} />
       </div>
 
       {/* 小節ミュート */}

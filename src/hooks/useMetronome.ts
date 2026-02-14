@@ -5,6 +5,7 @@ import {
   type BeatAccent,
   type MetronomeConfig,
   type SilentConfig,
+  type SoundType,
   type TempoRampConfig,
   type TimeSignature,
   getBeatCount,
@@ -20,6 +21,7 @@ interface UseMetronomeReturn {
   currentMeasure: number;
   setBpm: (bpm: number) => void;
   setTimeSignature: (ts: TimeSignature) => void;
+  setSound: (sound: SoundType) => void;
   toggleBeatAccent: (index: number) => void;
   setSilentConfig: (update: Partial<SilentConfig>) => void;
   setTempoRampConfig: (update: Partial<TempoRampConfig>) => void;
@@ -29,27 +31,159 @@ interface UseMetronomeReturn {
 
 // --- Audio ---
 
-function playClick(ctx: AudioContext, accent: BeatAccent, time: number) {
-  if (accent === 'mute') return;
+interface SoundDef {
+  strong: { freq: number; type: OscillatorType; duration: number; volume: number };
+  normal: { freq: number; type: OscillatorType; duration: number; volume: number };
+}
 
+const SOUND_DEFS: Record<Exclude<SoundType, 'hi-hat' | 'wood'>, SoundDef> = {
+  click: {
+    strong: { freq: 1000, type: 'sine', duration: 0.06, volume: 0.7 },
+    normal: { freq: 800, type: 'sine', duration: 0.04, volume: 0.4 },
+  },
+  beep: {
+    strong: { freq: 700, type: 'triangle', duration: 0.05, volume: 0.7 },
+    normal: { freq: 500, type: 'triangle', duration: 0.03, volume: 0.4 },
+  },
+};
+
+function playOscClick(
+  ctx: AudioContext,
+  accent: 'strong' | 'normal',
+  time: number,
+  def: SoundDef,
+) {
+  const params = def[accent];
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
-  const isStrong = accent === 'strong';
-  osc.frequency.value = isStrong ? 1000 : 800;
-  osc.type = 'sine';
+  osc.frequency.value = params.freq;
+  osc.type = params.type;
 
-  const duration = isStrong ? 0.06 : 0.04;
-  const volume = isStrong ? 0.7 : 0.4;
-
-  gain.gain.setValueAtTime(volume, time);
-  gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+  gain.gain.setValueAtTime(params.volume, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + params.duration);
 
   osc.connect(gain);
   gain.connect(ctx.destination);
 
   osc.start(time);
-  osc.stop(time + duration);
+  osc.stop(time + params.duration);
+}
+
+// --- ウッドブロック（サンプルベース） ---
+
+let woodBlockBuffer: AudioBuffer | null = null;
+let woodBlockLoadPromise: Promise<void> | null = null;
+
+// サンプル位置（秒）と再生長
+const WOOD_STRONG = { offset: 3.45, duration: 0.3 }; // 高い音
+const WOOD_NORMAL = { offset: 1.8, duration: 0.3 }; // 低い音
+
+function loadWoodBlockSample(ctx: AudioContext): Promise<void> {
+  if (woodBlockBuffer) return Promise.resolve();
+  if (woodBlockLoadPromise) return woodBlockLoadPromise;
+  woodBlockLoadPromise = (async () => {
+    try {
+      const res = await fetch('/sounds/wood-block.mp3');
+      const arrayBuf = await res.arrayBuffer();
+      woodBlockBuffer = await ctx.decodeAudioData(arrayBuf);
+    } catch (e) {
+      console.warn('ウッドブロックサンプルの読み込みに失敗:', e);
+    }
+  })();
+  return woodBlockLoadPromise;
+}
+
+function playWoodBlock(
+  ctx: AudioContext,
+  accent: 'strong' | 'normal',
+  time: number,
+) {
+  if (!woodBlockBuffer) return;
+
+  const sample = accent === 'strong' ? WOOD_STRONG : WOOD_NORMAL;
+  const source = ctx.createBufferSource();
+  source.buffer = woodBlockBuffer;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(accent === 'strong' ? 0.9 : 0.55, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + sample.duration);
+
+  source.connect(gain);
+  gain.connect(ctx.destination);
+
+  source.start(time, sample.offset, sample.duration);
+}
+
+// --- ハイハット（サンプルベース） ---
+
+let hiHatBuffer: AudioBuffer | null = null;
+let hiHatLoadPromise: Promise<void> | null = null;
+
+const HI_HAT_SAMPLE = { offset: 0, duration: 0.3 };
+
+function loadHiHatSample(ctx: AudioContext): Promise<void> {
+  if (hiHatBuffer) return Promise.resolve();
+  if (hiHatLoadPromise) return hiHatLoadPromise;
+  hiHatLoadPromise = (async () => {
+    try {
+      const res = await fetch('/sounds/hi-hat.mp3');
+      const arrayBuf = await res.arrayBuffer();
+      hiHatBuffer = await ctx.decodeAudioData(arrayBuf);
+    } catch (e) {
+      console.warn('ハイハットサンプルの読み込みに失敗:', e);
+    }
+  })();
+  return hiHatLoadPromise;
+}
+
+function playHiHat(
+  ctx: AudioContext,
+  accent: 'strong' | 'normal',
+  time: number,
+) {
+  if (!hiHatBuffer) return;
+
+  const isStrong = accent === 'strong';
+  const source = ctx.createBufferSource();
+  source.buffer = hiHatBuffer;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(isStrong ? 1.0 : 0.5, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + HI_HAT_SAMPLE.duration);
+
+  if (isStrong) {
+    // strong拍: ハイパスで高域を強調し明るく鋭い音に
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highshelf';
+    filter.frequency.value = 6000;
+    filter.gain.value = 6;
+
+    source.connect(filter);
+    filter.connect(gain);
+  } else {
+    source.connect(gain);
+  }
+  gain.connect(ctx.destination);
+
+  source.start(time, HI_HAT_SAMPLE.offset, HI_HAT_SAMPLE.duration);
+}
+
+function playClick(
+  ctx: AudioContext,
+  accent: BeatAccent,
+  time: number,
+  sound: SoundType,
+) {
+  if (accent === 'mute') return;
+
+  if (sound === 'hi-hat') {
+    playHiHat(ctx, accent, time);
+  } else if (sound === 'wood') {
+    playWoodBlock(ctx, accent, time);
+  } else {
+    playOscClick(ctx, accent, time, SOUND_DEFS[sound]);
+  }
 }
 
 // --- Hook ---
@@ -76,6 +210,7 @@ export function useMetronome(): UseMetronomeReturn {
     bpm: 100,
     timeSignature: '4/4',
     beatPattern: getDefaultPattern('4/4'),
+    sound: 'click',
     silent: DEFAULT_SILENT,
     tempoRamp: DEFAULT_TEMPO_RAMP,
   });
@@ -149,7 +284,7 @@ export function useMetronome(): UseMetronomeReturn {
 
       // 無音区間でなければ音を鳴らす
       if (!silent) {
-        playClick(ctx, accent, nextBeatTimeRef.current);
+        playClick(ctx, accent, nextBeatTimeRef.current, cfg.sound);
       }
 
       // UIは常に更新（無音中もビートは動く）
@@ -172,6 +307,11 @@ export function useMetronome(): UseMetronomeReturn {
     if (ctx.state === 'suspended') {
       await ctx.resume();
     }
+    // サンプル音源を事前読み込み（完了を待つ）
+    await Promise.all([
+      loadWoodBlockSample(ctx),
+      loadHiHatSample(ctx),
+    ]);
     return ctx;
   }, []);
 
@@ -195,7 +335,7 @@ export function useMetronome(): UseMetronomeReturn {
     const silent = checkSilent(0, cfg.silent);
 
     if (!silent) {
-      playClick(ctx, cfg.beatPattern[0], now);
+      playClick(ctx, cfg.beatPattern[0], now, cfg.sound);
     }
     setCurrentBeat(0);
     setIsSilentMeasure(silent);
@@ -247,6 +387,10 @@ export function useMetronome(): UseMetronomeReturn {
     }));
   }, []);
 
+  const setSound = useCallback((sound: SoundType) => {
+    setConfig((prev) => ({ ...prev, sound }));
+  }, []);
+
   const toggleBeatAccent = useCallback((index: number) => {
     setConfig((prev) => {
       const next: BeatAccent[] = [...prev.beatPattern];
@@ -283,6 +427,7 @@ export function useMetronome(): UseMetronomeReturn {
     currentMeasure,
     setBpm,
     setTimeSignature,
+    setSound,
     toggleBeatAccent,
     setSilentConfig,
     setTempoRampConfig,

@@ -13,7 +13,13 @@ function generateId(): string {
 function readFromStorage(): Preset[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const presets: Preset[] = JSON.parse(raw);
+    // 後方互換: soundフィールドがない古いプリセットにデフォルト値を補完
+    return presets.map((p) => ({
+      ...p,
+      config: { ...{ sound: 'click' as const }, ...p.config },
+    }));
   } catch {
     return [];
   }
