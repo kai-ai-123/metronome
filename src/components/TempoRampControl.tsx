@@ -42,7 +42,7 @@ export function TempoRampControl({
       {/* ヘッダー: ラベル + ON/OFFトグル */}
       <div className="flex items-center justify-center gap-3 mb-3">
         <span className="text-xs text-gray-400 tracking-widest uppercase">
-          テンポ変更
+          {config.enabled ? 'ON' : 'OFF'}
         </span>
         <button
           onClick={() => onChange({ enabled: !config.enabled })}
