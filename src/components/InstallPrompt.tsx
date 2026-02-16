@@ -72,11 +72,7 @@ export function InstallPrompt() {
             ホーム画面に追加すると、アプリのように使えます。
           </p>
           <p className="text-xs text-gray-500">
-            Safari の共有ボタン
-            <span className="inline-block mx-1 text-base leading-none align-middle">
-              ⎋
-            </span>
-            →「ホーム画面に追加」をタップ
+            Safari の共有ボタン →「ホーム画面に追加」をタップ
           </p>
         </>
       ) : (
