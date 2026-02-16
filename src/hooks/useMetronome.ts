@@ -314,7 +314,9 @@ export function useMetronome(): UseMetronomeReturn {
   const ensureAudioContext = useCallback(async (): Promise<AudioContext> => {
     let ctx = audioCtxRef.current;
     if (!ctx) {
-      ctx = new AudioContext();
+      // iOS Safari対応: webkitAudioContextフォールバック
+      const AudioCtx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctx = new AudioCtx();
       audioCtxRef.current = ctx;
     }
     if (!masterGainRef.current) {
@@ -326,6 +328,12 @@ export function useMetronome(): UseMetronomeReturn {
     if (ctx.state === 'suspended') {
       await ctx.resume();
     }
+    // iOS Safari: 無音バッファを再生してAudioContextをアンロック
+    const silent = ctx.createBuffer(1, 1, ctx.sampleRate);
+    const source = ctx.createBufferSource();
+    source.buffer = silent;
+    source.connect(ctx.destination);
+    source.start(0);
     // サンプル音源を事前読み込み（完了を待つ）
     await Promise.all([
       loadWoodBlockSample(ctx),
