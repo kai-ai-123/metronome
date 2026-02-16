@@ -96,7 +96,7 @@ export function PresetModal({
                         onKeyDown={(e) =>
                           e.key === 'Enter' && handleRenameConfirm()
                         }
-                        className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
+                        className="flex-1 border border-gray-300 rounded px-2 py-1 text-base"
                         autoFocus
                       />
                       <button
@@ -155,7 +155,7 @@ export function PresetModal({
                 onChange={(e) => setSaveName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSave()}
                 placeholder="プリセット名を入力"
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-base"
                 autoFocus
               />
               <button
