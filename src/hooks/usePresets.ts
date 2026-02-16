@@ -15,10 +15,11 @@ function readFromStorage(): Preset[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const presets: Preset[] = JSON.parse(raw);
-    // 後方互換: soundフィールドがない古いプリセットにデフォルト値を補完
+    // 後方互換: 古いプリセットにデフォルト値を補完
+    const defaults = { sound: 'click' as const, volume: 100 };
     return presets.map((p) => ({
       ...p,
-      config: { ...{ sound: 'click' as const }, ...p.config },
+      config: { ...defaults, ...p.config },
     }));
   } catch {
     return [];

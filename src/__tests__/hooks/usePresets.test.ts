@@ -11,6 +11,7 @@ const makeConfig = (bpm = 120): MetronomeConfig => ({
   timeSignature: '4/4',
   beatPattern: getDefaultPattern('4/4'),
   sound: 'click',
+  volume: 100,
   silent: { enabled: false, soundBars: 2, silentBars: 1 },
   tempoRamp: {
     enabled: false,

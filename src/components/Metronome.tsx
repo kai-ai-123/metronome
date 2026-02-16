@@ -96,7 +96,7 @@ export function Metronome() {
       modal: 'tempoRamp',
       active: config.tempoRamp.enabled,
     },
-    { label: 'プリセット', sub: '呼び出し', modal: 'presetLoad', sameStyle: true },
+    { label: 'プリセット', sub: `${presets.length}件`, modal: 'presetLoad', sameStyle: true },
   ];
 
   return (

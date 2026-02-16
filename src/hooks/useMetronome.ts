@@ -217,6 +217,7 @@ export function useMetronome(): UseMetronomeReturn {
     timeSignature: '4/4',
     beatPattern: getDefaultPattern('4/4'),
     sound: 'click',
+    volume: 100,
     silent: DEFAULT_SILENT,
     tempoRamp: DEFAULT_TEMPO_RAMP,
   });
@@ -224,8 +225,6 @@ export function useMetronome(): UseMetronomeReturn {
   const [currentBeat, setCurrentBeat] = useState(-1);
   const [isSilentMeasure, setIsSilentMeasure] = useState(false);
   const [currentMeasure, setCurrentMeasure] = useState(0);
-
-  const [volume, setVolumeState] = useState(80);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
@@ -238,8 +237,8 @@ export function useMetronome(): UseMetronomeReturn {
   const configRef = useRef(config);
   configRef.current = config;
 
-  const volumeRef = useRef(volume);
-  volumeRef.current = volume;
+  const volumeRef = useRef(config.volume);
+  volumeRef.current = config.volume;
 
   /** 現在の小節が無音区間かどうかを判定 */
   const checkSilent = useCallback(
@@ -421,7 +420,7 @@ export function useMetronome(): UseMetronomeReturn {
 
   const setVolume = useCallback((v: number) => {
     const clamped = Math.max(0, Math.min(100, v));
-    setVolumeState(clamped);
+    setConfig((prev) => ({ ...prev, volume: clamped }));
     if (masterGainRef.current) {
       masterGainRef.current.gain.value = clamped / 100;
     }
@@ -453,6 +452,9 @@ export function useMetronome(): UseMetronomeReturn {
 
   const applyConfig = useCallback((newConfig: MetronomeConfig) => {
     setConfig(newConfig);
+    if (masterGainRef.current && newConfig.volume !== undefined) {
+      masterGainRef.current.gain.value = newConfig.volume / 100;
+    }
   }, []);
 
   return {
@@ -461,7 +463,7 @@ export function useMetronome(): UseMetronomeReturn {
     currentBeat,
     isSilentMeasure,
     currentMeasure,
-    volume,
+    volume: config.volume,
     setBpm,
     setTimeSignature,
     setSound,

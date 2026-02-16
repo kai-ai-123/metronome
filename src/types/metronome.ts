@@ -40,6 +40,7 @@ export interface MetronomeConfig {
   timeSignature: TimeSignature;
   beatPattern: BeatAccent[];
   sound: SoundType;
+  volume: number;
   silent: SilentConfig;
   tempoRamp: TempoRampConfig;
 }
