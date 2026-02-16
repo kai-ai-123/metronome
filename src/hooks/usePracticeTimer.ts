@@ -14,7 +14,7 @@ function formatTime(totalSeconds: number): string {
 export function usePracticeTimer() {
   const [mode, setMode] = useState<TimerMode>('stopwatch');
   const [targetMinutes, setTargetMinutes] = useState(30);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(3590); // TODO: テスト用（59:50開始）→ 確認後0に戻す
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
