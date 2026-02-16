@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useMetronome } from '@/hooks/useMetronome';
 import { usePresets } from '@/hooks/usePresets';
@@ -46,10 +46,20 @@ export function Metronome() {
     setTempoRampConfig,
     applyConfig,
     togglePlay,
+    stop: stopMetronome,
   } = useMetronome();
 
   const { presets, savePreset, deletePreset, renamePreset } = usePresets();
-  const timer = usePracticeTimer();
+
+  // メトロノーム停止用refを先に用意（usePracticeTimerのonFinishで使う）
+  const stopMetronomeRef = useRef(stopMetronome);
+  stopMetronomeRef.current = stopMetronome;
+
+  const handleTimerFinish = useCallback(() => {
+    stopMetronomeRef.current();
+  }, []);
+
+  const timer = usePracticeTimer(handleTimerFinish);
   const [timerEnabled, setTimerEnabled] = useState(true);
   const [syncWithMetronome, setSyncWithMetronome] = useState(true);
   const [activeModal, setActiveModal] = useState<ModalType>(null);

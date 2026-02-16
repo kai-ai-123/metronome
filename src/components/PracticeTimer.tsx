@@ -1,7 +1,7 @@
 import type { TimerMode } from '@/types/timer';
 import { SettingModal } from './SettingModal';
 
-const TARGET_OPTIONS = [5, 10, 15, 20, 30, 45, 60];
+const TARGET_OPTIONS = [0.17, 5, 10, 15, 20, 30, 45, 60]; // 0.17 = 10秒（テスト用）
 
 interface PracticeTimerProps {
   enabled: boolean;
@@ -51,6 +51,25 @@ export function PracticeTimer({
 
   return (
     <>
+      {/* カウントダウン完了バナー（ユーザーが閉じるまで表示） */}
+      {isFinished && (
+        <div className="w-full bg-green-600 text-white rounded-xl px-4 py-3 flex items-center justify-between mb-2 animate-pulse">
+          <div className="flex items-center gap-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <span className="text-sm font-medium">練習完了！お疲れさまでした</span>
+          </div>
+          <button
+            onClick={onReset}
+            className="text-xs bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1 transition-colors"
+          >
+            閉じる
+          </button>
+        </div>
+      )}
+
       {/* 2列: 設定ボタン（左） + 時間表示（右） */}
       <div className="w-full flex items-center justify-center gap-3" data-testid="practice-timer">
         {/* 設定ボタン */}
@@ -186,7 +205,7 @@ export function PracticeTimer({
                             : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
                         }`}
                       >
-                        {m}分
+                        {m < 1 ? `${Math.round(m * 60)}秒` : `${m}分`}
                       </button>
                     ))}
                   </div>

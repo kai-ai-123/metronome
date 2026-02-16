@@ -29,6 +29,7 @@ interface UseMetronomeReturn {
   setTempoRampConfig: (update: Partial<TempoRampConfig>) => void;
   applyConfig: (config: MetronomeConfig) => void;
   togglePlay: () => void;
+  stop: () => void;
 }
 
 // --- Audio ---
@@ -473,5 +474,6 @@ export function useMetronome(): UseMetronomeReturn {
     setTempoRampConfig,
     applyConfig,
     togglePlay,
+    stop,
   };
 }

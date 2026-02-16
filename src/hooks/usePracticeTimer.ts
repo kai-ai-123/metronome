@@ -11,13 +11,15 @@ function formatTime(totalSeconds: number): string {
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-export function usePracticeTimer() {
+export function usePracticeTimer(onFinish?: () => void) {
   const [mode, setMode] = useState<TimerMode>('stopwatch');
   const [targetMinutes, setTargetMinutes] = useState(30);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onFinishRef = useRef(onFinish);
+  onFinishRef.current = onFinish;
 
   const clearTimer = useCallback(() => {
     if (intervalRef.current !== null) {
@@ -66,6 +68,9 @@ export function usePracticeTimer() {
       setIsRunning(false);
       setIsFinished(true);
       clearTimer();
+
+      // 完了コールバック（メトロノーム停止等）
+      onFinishRef.current?.();
 
       // ブラウザ通知
       if (typeof window !== 'undefined' && 'Notification' in window) {
