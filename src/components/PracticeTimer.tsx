@@ -25,7 +25,7 @@ interface PracticeTimerProps {
 
 function timerSubLabel(enabled: boolean, mode: TimerMode): string {
   if (!enabled) return 'OFF';
-  return mode === 'stopwatch' ? 'ストップウォッチ' : 'カウントダウン';
+  return mode === 'stopwatch' ? 'カウントアップ' : 'カウントダウン';
 }
 
 export function PracticeTimer({
@@ -165,7 +165,7 @@ export function PracticeTimer({
                           : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
                       }`}
                     >
-                      {m === 'stopwatch' ? 'ストップウォッチ' : 'カウントダウン'}
+                      {m === 'stopwatch' ? 'カウントアップ' : 'カウントダウン'}
                     </button>
                   ))}
                 </div>

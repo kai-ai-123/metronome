@@ -85,7 +85,7 @@ export function Metronome() {
     { label: '音色', sub: soundLabel, modal: 'sound' },
     { label: '音量', sub: `${volume}%`, modal: 'volume' },
     {
-      label: 'ミュート',
+      label: 'ミュート切替',
       sub: config.silent.enabled ? 'ON' : 'OFF',
       modal: 'silent',
       active: config.silent.enabled,
@@ -96,7 +96,7 @@ export function Metronome() {
       modal: 'tempoRamp',
       active: config.tempoRamp.enabled,
     },
-    { label: 'プリセット', sub: `${presets.length}件`, modal: 'presetLoad', sameStyle: true },
+    { label: 'プリセット', sub: '', modal: 'presetLoad', sameStyle: true },
   ];
 
   return (
@@ -139,14 +139,16 @@ export function Metronome() {
             >
               {btn.label}
             </span>
-            <span
-              className={btn.sameStyle
-                ? `text-xs font-medium ${btn.active ? 'text-white' : 'text-gray-900'}`
-                : `text-[11px] ${btn.active ? 'text-gray-300' : 'text-gray-400'}`
-              }
-            >
-              {btn.sub}
-            </span>
+            {btn.sub && (
+              <span
+                className={btn.sameStyle
+                  ? `text-xs font-medium ${btn.active ? 'text-white' : 'text-gray-900'}`
+                  : `text-[11px] ${btn.active ? 'text-gray-300' : 'text-gray-400'}`
+                }
+              >
+                {btn.sub}
+              </span>
+            )}
           </button>
         ))}
       </div>
