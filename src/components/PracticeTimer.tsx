@@ -51,9 +51,9 @@ export function PracticeTimer({
 
   return (
     <>
-      {/* カウントダウン完了バナー（ユーザーが閉じるまで表示） */}
+      {/* カウントダウン完了バナー（画面最上部に固定、ユーザーが閉じるまで表示） */}
       {isFinished && (
-        <div className="w-full bg-green-600 text-white rounded-xl px-4 py-3 flex items-center justify-between mb-2 animate-pulse">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-green-600 text-white px-4 py-3 flex items-center justify-between" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
