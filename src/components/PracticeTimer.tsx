@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import type { TimerMode } from '@/types/timer';
 import { SettingModal } from './SettingModal';
 
@@ -51,24 +52,8 @@ export function PracticeTimer({
 
   return (
     <>
-      {/* カウントダウン完了バナー（画面最上部に固定、ユーザーが閉じるまで表示） */}
-      {isFinished && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-green-600 text-white px-4 py-3 flex items-center justify-between" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
-          <div className="flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-            <span className="text-sm font-medium">練習完了！お疲れさまでした</span>
-          </div>
-          <button
-            onClick={onReset}
-            className="text-xs bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1 transition-colors"
-          >
-            閉じる
-          </button>
-        </div>
-      )}
+      {/* カウントダウン完了バナー（画面最上部に固定 + bodyを押し下げ） */}
+      {isFinished && <FinishBanner onClose={onReset} />}
 
       {/* 2列: 設定ボタン（左） + 時間表示（右） */}
       <div className="w-full flex items-center justify-center gap-3" data-testid="practice-timer">
@@ -243,5 +228,44 @@ export function PracticeTimer({
         </SettingModal>
       )}
     </>
+  );
+}
+
+/** 画面最上部に固定表示し、バナーの高さ分だけbodyを押し下げるバナー */
+function FinishBanner({ onClose }: { onClose: () => void }) {
+  const bannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = bannerRef.current;
+    if (!el) return;
+    const update = () => {
+      document.body.style.paddingTop = `${el.offsetHeight}px`;
+    };
+    update();
+    return () => {
+      document.body.style.paddingTop = '';
+    };
+  }, []);
+
+  return (
+    <div
+      ref={bannerRef}
+      className="fixed top-0 left-0 right-0 z-50 bg-green-600 text-white px-4 py-3 flex items-center justify-between"
+      style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+    >
+      <div className="flex items-center gap-2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        <span className="text-sm font-medium">練習完了！お疲れさまでした</span>
+      </div>
+      <button
+        onClick={onClose}
+        className="text-xs bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1 transition-colors"
+      >
+        閉じる
+      </button>
+    </div>
   );
 }
