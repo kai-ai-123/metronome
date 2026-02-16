@@ -59,8 +59,8 @@ export function TempoRampControl({
         </button>
       </div>
 
-      {/* 設定パネル（有効時のみ表示） */}
-      {config.enabled && (
+      {/* 設定パネル */}
+      <div className={config.enabled ? '' : 'opacity-40 pointer-events-none'}>
         <div className="flex flex-col items-center gap-3">
           {/* UP / DOWN 切り替え */}
           <div className="flex rounded-lg overflow-hidden border border-gray-200">
@@ -155,7 +155,7 @@ export function TempoRampControl({
             </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

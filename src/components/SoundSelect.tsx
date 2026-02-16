@@ -9,7 +9,7 @@ interface SoundSelectProps {
 
 export function SoundSelect({ value, onChange }: SoundSelectProps) {
   return (
-    <div data-testid="sound-select" className="flex flex-wrap justify-center gap-2">
+    <div data-testid="sound-select" className="grid grid-cols-2 gap-2">
       {SOUND_TYPES.map(({ id, label }) => (
         <button
           key={id}

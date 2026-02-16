@@ -21,7 +21,7 @@ export function SilentControl({ config, onChange }: SilentControlProps) {
           className={`relative w-11 h-6 rounded-full transition-colors ${
             config.enabled ? 'bg-gray-900' : 'bg-gray-300'
           }`}
-          aria-label="小節ミュートの切り替え"
+          aria-label="ミュート切替"
         >
           <span
             className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
@@ -31,8 +31,8 @@ export function SilentControl({ config, onChange }: SilentControlProps) {
         </button>
       </div>
 
-      {/* 設定パネル（有効時のみ表示） */}
-      {config.enabled && (
+      {/* 設定パネル */}
+      <div className={config.enabled ? '' : 'opacity-40 pointer-events-none'}>
         <div className="flex items-center justify-center gap-6">
           {/* ON小節数 */}
           <div className="flex items-center gap-2">
@@ -82,7 +82,7 @@ export function SilentControl({ config, onChange }: SilentControlProps) {
             </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

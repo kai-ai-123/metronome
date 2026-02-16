@@ -19,9 +19,11 @@ interface UseMetronomeReturn {
   currentBeat: number;
   isSilentMeasure: boolean;
   currentMeasure: number;
+  volume: number;
   setBpm: (bpm: number) => void;
   setTimeSignature: (ts: TimeSignature) => void;
   setSound: (sound: SoundType) => void;
+  setVolume: (volume: number) => void;
   toggleBeatAccent: (index: number) => void;
   setSilentConfig: (update: Partial<SilentConfig>) => void;
   setTempoRampConfig: (update: Partial<TempoRampConfig>) => void;
@@ -49,6 +51,7 @@ const SOUND_DEFS: Record<Exclude<SoundType, 'hi-hat' | 'wood'>, SoundDef> = {
 
 function playOscClick(
   ctx: AudioContext,
+  dest: AudioNode,
   accent: 'strong' | 'normal',
   time: number,
   def: SoundDef,
@@ -64,7 +67,7 @@ function playOscClick(
   gain.gain.exponentialRampToValueAtTime(0.001, time + params.duration);
 
   osc.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(dest);
 
   osc.start(time);
   osc.stop(time + params.duration);
@@ -96,6 +99,7 @@ function loadWoodBlockSample(ctx: AudioContext): Promise<void> {
 
 function playWoodBlock(
   ctx: AudioContext,
+  dest: AudioNode,
   accent: 'strong' | 'normal',
   time: number,
 ) {
@@ -110,7 +114,7 @@ function playWoodBlock(
   gain.gain.exponentialRampToValueAtTime(0.001, time + sample.duration);
 
   source.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(dest);
 
   source.start(time, sample.offset, sample.duration);
 }
@@ -120,7 +124,7 @@ function playWoodBlock(
 let hiHatBuffer: AudioBuffer | null = null;
 let hiHatLoadPromise: Promise<void> | null = null;
 
-const HI_HAT_SAMPLE = { offset: 0, duration: 0.3 };
+const HI_HAT_SAMPLE = { offset: 0.05, duration: 0.3 };
 
 function loadHiHatSample(ctx: AudioContext): Promise<void> {
   if (hiHatBuffer) return Promise.resolve();
@@ -139,6 +143,7 @@ function loadHiHatSample(ctx: AudioContext): Promise<void> {
 
 function playHiHat(
   ctx: AudioContext,
+  dest: AudioNode,
   accent: 'strong' | 'normal',
   time: number,
 ) {
@@ -164,13 +169,14 @@ function playHiHat(
   } else {
     source.connect(gain);
   }
-  gain.connect(ctx.destination);
+  gain.connect(dest);
 
   source.start(time, HI_HAT_SAMPLE.offset, HI_HAT_SAMPLE.duration);
 }
 
 function playClick(
   ctx: AudioContext,
+  dest: AudioNode,
   accent: BeatAccent,
   time: number,
   sound: SoundType,
@@ -178,11 +184,11 @@ function playClick(
   if (accent === 'mute') return;
 
   if (sound === 'hi-hat') {
-    playHiHat(ctx, accent, time);
+    playHiHat(ctx, dest, accent, time);
   } else if (sound === 'wood') {
-    playWoodBlock(ctx, accent, time);
+    playWoodBlock(ctx, dest, accent, time);
   } else {
-    playOscClick(ctx, accent, time, SOUND_DEFS[sound]);
+    playOscClick(ctx, dest, accent, time, SOUND_DEFS[sound]);
   }
 }
 
@@ -219,7 +225,10 @@ export function useMetronome(): UseMetronomeReturn {
   const [isSilentMeasure, setIsSilentMeasure] = useState(false);
   const [currentMeasure, setCurrentMeasure] = useState(0);
 
+  const [volume, setVolumeState] = useState(80);
+
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const masterGainRef = useRef<GainNode | null>(null);
   const timerRef = useRef<number | null>(null);
   const nextBeatTimeRef = useRef(0);
   const beatIndexRef = useRef(0);
@@ -228,6 +237,9 @@ export function useMetronome(): UseMetronomeReturn {
 
   const configRef = useRef(config);
   configRef.current = config;
+
+  const volumeRef = useRef(volume);
+  volumeRef.current = volume;
 
   /** 現在の小節が無音区間かどうかを判定 */
   const checkSilent = useCallback(
@@ -264,18 +276,18 @@ export function useMetronome(): UseMetronomeReturn {
             measureCountRef.current - lastRampMeasureRef.current;
           if (measuresSinceLast >= ramp.everyBars) {
             lastRampMeasureRef.current = measureCountRef.current;
-            const currentBpm = cfg.bpm;
-            const step = ramp.mode === 'up' ? ramp.stepBpm : -ramp.stepBpm;
-            let newBpm = currentBpm + step;
-            // 到達BPMを超えないようクランプ
-            if (ramp.mode === 'up') {
-              newBpm = Math.min(newBpm, ramp.targetBpm);
-            } else {
-              newBpm = Math.max(newBpm, ramp.targetBpm);
-            }
-            if (newBpm !== currentBpm) {
-              setConfig((prev) => ({ ...prev, bpm: newBpm }));
-            }
+            // functional update内でprev.bpmから計算し、他のsetConfigとの競合を防止
+            setConfig((prev) => {
+              const step = ramp.mode === 'up' ? ramp.stepBpm : -ramp.stepBpm;
+              let newBpm = prev.bpm + step;
+              if (ramp.mode === 'up') {
+                newBpm = Math.min(newBpm, ramp.targetBpm);
+              } else {
+                newBpm = Math.max(newBpm, ramp.targetBpm);
+              }
+              if (newBpm === prev.bpm) return prev;
+              return { ...prev, bpm: newBpm };
+            });
           }
         }
       }
@@ -284,7 +296,8 @@ export function useMetronome(): UseMetronomeReturn {
 
       // 無音区間でなければ音を鳴らす
       if (!silent) {
-        playClick(ctx, accent, nextBeatTimeRef.current, cfg.sound);
+        const dest = masterGainRef.current ?? ctx.destination;
+        playClick(ctx, dest, accent, nextBeatTimeRef.current, cfg.sound);
       }
 
       // UIは常に更新（無音中もビートは動く）
@@ -303,6 +316,12 @@ export function useMetronome(): UseMetronomeReturn {
     if (!ctx) {
       ctx = new AudioContext();
       audioCtxRef.current = ctx;
+    }
+    if (!masterGainRef.current) {
+      const gain = ctx.createGain();
+      gain.gain.value = volumeRef.current / 100;
+      gain.connect(ctx.destination);
+      masterGainRef.current = gain;
     }
     if (ctx.state === 'suspended') {
       await ctx.resume();
@@ -335,7 +354,8 @@ export function useMetronome(): UseMetronomeReturn {
     const silent = checkSilent(0, cfg.silent);
 
     if (!silent) {
-      playClick(ctx, cfg.beatPattern[0], now, cfg.sound);
+      const dest = masterGainRef.current ?? ctx.destination;
+      playClick(ctx, dest, cfg.beatPattern[0], now, cfg.sound);
     }
     setCurrentBeat(0);
     setIsSilentMeasure(silent);
@@ -391,6 +411,14 @@ export function useMetronome(): UseMetronomeReturn {
     setConfig((prev) => ({ ...prev, sound }));
   }, []);
 
+  const setVolume = useCallback((v: number) => {
+    const clamped = Math.max(0, Math.min(100, v));
+    setVolumeState(clamped);
+    if (masterGainRef.current) {
+      masterGainRef.current.gain.value = clamped / 100;
+    }
+  }, []);
+
   const toggleBeatAccent = useCallback((index: number) => {
     setConfig((prev) => {
       const next: BeatAccent[] = [...prev.beatPattern];
@@ -425,9 +453,11 @@ export function useMetronome(): UseMetronomeReturn {
     currentBeat,
     isSilentMeasure,
     currentMeasure,
+    volume,
     setBpm,
     setTimeSignature,
     setSound,
+    setVolume,
     toggleBeatAccent,
     setSilentConfig,
     setTempoRampConfig,

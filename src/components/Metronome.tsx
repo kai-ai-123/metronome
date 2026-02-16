@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMetronome } from '@/hooks/useMetronome';
 import { usePresets } from '@/hooks/usePresets';
+import { usePracticeTimer } from '@/hooks/usePracticeTimer';
 import { BPMControl } from './BPMControl';
 import { TimeSignatureSelect } from './TimeSignatureSelect';
 import { BeatPattern } from './BeatPattern';
@@ -12,15 +13,19 @@ import { PlayButton } from './PlayButton';
 import { SoundSelect } from './SoundSelect';
 import { PresetModal } from './PresetModal';
 import { SettingModal } from './SettingModal';
+import { VolumeControl } from './VolumeControl';
+import { PracticeTimer } from './PracticeTimer';
+import { InstallPrompt } from './InstallPrompt';
 import { SOUND_TYPES } from '@/types/metronome';
 
 type ModalType =
   | 'timeSignature'
   | 'sound'
+  | 'volume'
   | 'silent'
   | 'tempoRamp'
   | 'presetLoad'
-  | 'presetSave'
+  | 'timer'
   | null;
 
 export function Metronome() {
@@ -28,10 +33,12 @@ export function Metronome() {
     config,
     isPlaying,
     currentBeat,
+    volume,
     setBpm,
     setTimeSignature,
     toggleBeatAccent,
     setSound,
+    setVolume,
     setSilentConfig,
     setTempoRampConfig,
     applyConfig,
@@ -39,7 +46,30 @@ export function Metronome() {
   } = useMetronome();
 
   const { presets, savePreset, deletePreset, renamePreset } = usePresets();
+  const timer = usePracticeTimer();
+  const [timerEnabled, setTimerEnabled] = useState(true);
+  const [syncWithMetronome, setSyncWithMetronome] = useState(true);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+
+  // メトロノーム連動（timer.start/stopをrefで安定化し、不要な再実行を防止）
+  const timerStartRef = useRef(timer.start);
+  const timerStopRef = useRef(timer.stop);
+  timerStartRef.current = timer.start;
+  timerStopRef.current = timer.stop;
+
+  const prevIsPlaying = useRef(isPlaying);
+  useEffect(() => {
+    if (!timerEnabled || !syncWithMetronome) {
+      prevIsPlaying.current = isPlaying;
+      return;
+    }
+    if (isPlaying && !prevIsPlaying.current) {
+      timerStartRef.current();
+    } else if (!isPlaying && prevIsPlaying.current) {
+      timerStopRef.current();
+    }
+    prevIsPlaying.current = isPlaying;
+  }, [isPlaying, timerEnabled, syncWithMetronome]);
 
   const soundLabel =
     SOUND_TYPES.find((s) => s.id === config.sound)?.label ?? config.sound;
@@ -50,10 +80,10 @@ export function Metronome() {
     modal: ModalType;
     active?: boolean;
     sameStyle?: boolean;
-    action?: () => void;
   }[] = [
     { label: '拍子', sub: config.timeSignature, modal: 'timeSignature' },
     { label: '音色', sub: soundLabel, modal: 'sound' },
+    { label: '音量', sub: `${volume}%`, modal: 'volume' },
     {
       label: 'ミュート',
       sub: config.silent.enabled ? 'ON' : 'OFF',
@@ -67,18 +97,6 @@ export function Metronome() {
       active: config.tempoRamp.enabled,
     },
     { label: 'プリセット', sub: '呼び出し', modal: 'presetLoad', sameStyle: true },
-    {
-      label: 'プリセット',
-      sub: '保存',
-      modal: 'presetSave' as ModalType,
-      sameStyle: true,
-      action: () => {
-        const name = window.prompt('プリセット名を入力');
-        if (name?.trim()) {
-          savePreset(name.trim(), config);
-        }
-      },
-    },
   ];
 
   return (
@@ -86,6 +104,9 @@ export function Metronome() {
       data-testid="metronome"
       className="flex flex-col items-center gap-6 w-full max-w-md mx-auto px-4 py-8"
     >
+      {/* インストール案内 */}
+      <InstallPrompt />
+
       {/* BPM表示 + コントロール */}
       <BPMControl bpm={config.bpm} onChange={setBpm} />
 
@@ -94,9 +115,6 @@ export function Metronome() {
 
       {/* 拍パターン */}
       <div className="w-full">
-        <div className="text-xs text-gray-400 text-center mb-3">
-          （タップで強弱切り替え）
-        </div>
         <BeatPattern
           pattern={config.beatPattern}
           currentBeat={currentBeat}
@@ -104,18 +122,12 @@ export function Metronome() {
         />
       </div>
 
-      {/* 設定ボタングリッド 2×2 */}
-      <div className="w-full grid grid-cols-2 gap-2">
+      {/* 設定ボタングリッド 3×2 */}
+      <div className="w-full grid grid-cols-3 gap-2">
         {settingButtons.map((btn, i) => (
           <button
             key={`${btn.modal}-${i}`}
-            onClick={() => {
-              if (btn.action) {
-                btn.action();
-              } else {
-                setActiveModal(btn.modal);
-              }
-            }}
+            onClick={() => setActiveModal(btn.modal)}
             className={`flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl transition-colors ${
               btn.active
                 ? 'bg-gray-900 text-white'
@@ -138,6 +150,27 @@ export function Metronome() {
           </button>
         ))}
       </div>
+
+      {/* 練習タイマー: 設定ボタン + 時間表示の2列 */}
+      <PracticeTimer
+        enabled={timerEnabled}
+        onToggleEnabled={() => setTimerEnabled((v) => !v)}
+        mode={timer.mode}
+        onModeChange={(m) => { timer.reset(); timer.setMode(m); }}
+        targetMinutes={timer.targetMinutes}
+        onTargetChange={(m) => { timer.reset(); timer.setTargetMinutes(m); }}
+        syncWithMetronome={syncWithMetronome}
+        onSyncChange={setSyncWithMetronome}
+        timeDisplay={timer.timeDisplay}
+        isRunning={timer.isRunning}
+        isFinished={timer.isFinished}
+        onStart={timer.start}
+        onStop={timer.stop}
+        onReset={timer.reset}
+        showModal={activeModal === 'timer'}
+        onOpenModal={() => setActiveModal('timer')}
+        onCloseModal={() => setActiveModal(null)}
+      />
 
       {/* モーダル群 */}
       {activeModal === 'timeSignature' && (
@@ -164,8 +197,14 @@ export function Metronome() {
         </SettingModal>
       )}
 
+      {activeModal === 'volume' && (
+        <SettingModal title="音量" onClose={() => setActiveModal(null)}>
+          <VolumeControl volume={volume} onChange={setVolume} />
+        </SettingModal>
+      )}
+
       {activeModal === 'silent' && (
-        <SettingModal title="小節ミュート" onClose={() => setActiveModal(null)}>
+        <SettingModal title="ミュート切替" onClose={() => setActiveModal(null)}>
           <SilentControl
             config={config.silent}
             onChange={setSilentConfig}

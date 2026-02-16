@@ -12,10 +12,12 @@ export function BPMControl({ bpm, onChange }: BPMControlProps) {
   return (
     <div className="flex flex-col items-center gap-4">
       {/* BPM数値 */}
-      <div data-testid="bpm-value" className="text-6xl font-light text-gray-900 tabular-nums">
-        {bpm}
+      <div className="relative inline-flex items-baseline justify-center">
+        <div data-testid="bpm-value" className="text-6xl font-light text-gray-900 tabular-nums">
+          {bpm}
+        </div>
+        <span className="absolute left-full bottom-0 ml-1.5 text-sm text-gray-400 tracking-widest uppercase">BPM</span>
       </div>
-      <div className="text-sm text-gray-400 tracking-widest uppercase">BPM</div>
 
       {/* ボタン + スライダー */}
       <div className="flex items-center gap-2 w-full max-w-xs">
