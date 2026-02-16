@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import type { TimerMode } from '@/types/timer';
 import { SettingModal } from './SettingModal';
 
-const TARGET_OPTIONS = [0.17, 5, 10, 15, 20, 30, 45, 60]; // 0.17 = 10秒（テスト用）
+const TARGET_OPTIONS = [5, 10, 15, 20, 30, 45, 60];
 
 interface PracticeTimerProps {
   enabled: boolean;
@@ -190,7 +190,7 @@ export function PracticeTimer({
                             : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
                         }`}
                       >
-                        {m < 1 ? `${Math.round(m * 60)}秒` : `${m}分`}
+                        {m}分
                       </button>
                     ))}
                   </div>
