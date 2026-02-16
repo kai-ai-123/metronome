@@ -145,6 +145,11 @@ export function PresetModal({
           )}
         </div>
 
+        {/* 注意書き */}
+        <p className="text-xs text-gray-400 text-center px-4 pt-2">
+          ※ しばらく使用していないとリセットされる場合があります
+        </p>
+
         {/* 保存エリア */}
         <div className="px-4 py-3 border-t border-gray-100">
           {isSaving ? (

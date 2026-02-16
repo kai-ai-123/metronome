@@ -20,6 +20,9 @@ export function VolumeControl({ volume, onChange }: VolumeControlProps) {
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full max-w-xs accent-gray-900"
       />
+      <p className="text-xs text-gray-400 text-center">
+        ※ マナーモードがONだと音が出ません
+      </p>
     </div>
   );
 }

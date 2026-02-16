@@ -1,22 +1,25 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useMetronome } from '@/hooks/useMetronome';
 import { usePresets } from '@/hooks/usePresets';
 import { usePracticeTimer } from '@/hooks/usePracticeTimer';
 import { BPMControl } from './BPMControl';
-import { TimeSignatureSelect } from './TimeSignatureSelect';
 import { BeatPattern } from './BeatPattern';
-import { SilentControl } from './SilentControl';
-import { TempoRampControl } from './TempoRampControl';
 import { PlayButton } from './PlayButton';
-import { SoundSelect } from './SoundSelect';
-import { PresetModal } from './PresetModal';
-import { SettingModal } from './SettingModal';
-import { VolumeControl } from './VolumeControl';
 import { PracticeTimer } from './PracticeTimer';
-import { InstallPrompt } from './InstallPrompt';
 import { SOUND_TYPES } from '@/types/metronome';
+
+// モーダル系コンポーネントを遅延ロード（初回バンドルから分離）
+const SettingModal = dynamic(() => import('./SettingModal').then(m => ({ default: m.SettingModal })), { ssr: false });
+const PresetModal = dynamic(() => import('./PresetModal').then(m => ({ default: m.PresetModal })), { ssr: false });
+const TimeSignatureSelect = dynamic(() => import('./TimeSignatureSelect').then(m => ({ default: m.TimeSignatureSelect })), { ssr: false });
+const SoundSelect = dynamic(() => import('./SoundSelect').then(m => ({ default: m.SoundSelect })), { ssr: false });
+const VolumeControl = dynamic(() => import('./VolumeControl').then(m => ({ default: m.VolumeControl })), { ssr: false });
+const SilentControl = dynamic(() => import('./SilentControl').then(m => ({ default: m.SilentControl })), { ssr: false });
+const TempoRampControl = dynamic(() => import('./TempoRampControl').then(m => ({ default: m.TempoRampControl })), { ssr: false });
+const InstallPrompt = dynamic(() => import('./InstallPrompt').then(m => ({ default: m.InstallPrompt })), { ssr: false });
 
 type ModalType =
   | 'timeSignature'
