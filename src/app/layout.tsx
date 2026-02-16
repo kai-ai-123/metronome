@@ -11,7 +11,7 @@ const APP_NAME = 'Metronome';
 const APP_DESCRIPTION = '楽器練習サポートツール';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://metronome-app.vercel.app'),
+  metadataBase: new URL('https://metronome-app-online.vercel.app'),
   title: APP_NAME,
   description: APP_DESCRIPTION,
   appleWebApp: {
